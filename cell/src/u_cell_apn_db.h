@@ -159,7 +159,7 @@ static const uCellNetApn_t gApnLookUpTable[] = {
         _APN("fast.tmobile.com",,) /* LTE */
     },
     { /* AT&T */     "310-030,150,170,260,410,560,680",
-        _APN("phone",,)
+        _APN("iot0119.com.attz",,)
         _APN("wap.cingular", "WAP@CINGULARGPRS.COM", "CINGULAR1")
         _APN("isp.cingular", "ISP@CINGULARGPRS.COM", "CINGULAR1")
     },
