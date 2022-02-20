@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include "u_error_common.h"
+#include "u_cell_private.h"
+
 #ifndef _U_CELL_H_
 #define _U_CELL_H_
 
