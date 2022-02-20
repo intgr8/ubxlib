@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#include "u_cell_module_type.h"
+#include "u_cell_net.h"
+#include "u_port_os.h"
+#include "u_at_client.h"
+
 #ifndef _U_CELL_PRIVATE_H_
 #define _U_CELL_PRIVATE_H_
 
