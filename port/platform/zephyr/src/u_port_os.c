@@ -18,6 +18,27 @@
  * @brief Implementation of the port OS API for the Zephyr platform.
  */
 
+/* ----------------------------------------------------------------
+ * INCLUDE FILES
+ * -------------------------------------------------------------- */
+
+#include "stddef.h"    // NULL, size_t etc.
+#include "stdint.h"    // int32_t etc.
+#include "stdio.h"     // sizeof
+#include "stdbool.h"
+#include "assert.h"
+#include "stdlib.h"
+#include "string.h"    // memset
+
+#include "u_cfg_sw.h"
+#include "u_cfg_os_platform_specific.h"
+#include "u_error_common.h"
+#include "u_port_debug.h"
+#include "u_port.h"
+#include "u_port_os.h"
+
+#include "zephyr.h"
+
 #ifdef U_CFG_OVERRIDE
 # include "u_cfg_override.h" // For a customer's configuration override
 #endif
@@ -56,26 +77,6 @@
 #undef U_CFG_MUTEX_DEBUG
 
 /* ----------------------------------------------------------------
- * INCLUDE FILES
- * -------------------------------------------------------------- */
-
-#include "stddef.h"    // NULL, size_t etc.
-#include "stdint.h"    // int32_t etc.
-#include "stdbool.h"
-#include "assert.h"
-#include "stdlib.h"
-#include "string.h"    // memset
-
-#include "u_cfg_sw.h"
-#include "u_cfg_os_platform_specific.h"
-#include "u_error_common.h"
-#include "u_port_debug.h"
-#include "u_port.h"
-#include "u_port_os.h"
-
-#include <zephyr.h>
-
-/* ----------------------------------------------------------------
  * COMPILE-TIME MACROS
  * -------------------------------------------------------------- */
 
@@ -83,8 +84,8 @@
 #define portMAX_DELAY K_FOREVER
 #endif
 
-static uint8_t __aligned(U_CFG_OS_EXECUTABLE_CHUNK_INDEX_0_SIZE)
-exe_chunk_0[U_CFG_OS_EXECUTABLE_CHUNK_INDEX_0_SIZE];
+static uint8_t exe_chunk_0[U_CFG_OS_EXECUTABLE_CHUNK_INDEX_0_SIZE]
+    __attribute__((aligned(U_CFG_OS_EXECUTABLE_CHUNK_INDEX_0_SIZE)));
 // make this ram part executable
 K_MEM_PARTITION_DEFINE(chunk0_reloc, exe_chunk_0, sizeof(exe_chunk_0),
                        K_MEM_PARTITION_P_RWX_U_RWX);

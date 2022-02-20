@@ -63,6 +63,13 @@
 #define U_PORT_UART_BUFFER_SIZE 4096
 #endif
 
+/**
+ * @brief This is temporary
+ * 
+ * @todo move this to somewhere else
+ * 
+ */
+#define LTE_UART    DT_ALIAS(lteuart)
 /* ----------------------------------------------------------------
  * TYPES
  * -------------------------------------------------------------- */
@@ -222,6 +229,7 @@ static void uartCb(const struct device *uart, void *user_data)
         if (gUartData[i].pTxData == NULL) {
             gUartData[i].pTxData = k_fifo_get(&gUartData[i].fifoTxData, K_NO_WAIT);
             gUartData[i].txWritten = 0;
+            // uart_irq_tx_disable(uart);
         }
 
         if (!gUartData[i].pTxData) {
@@ -261,7 +269,13 @@ int32_t uPortUartInit()
             const struct device *dev = NULL;
             switch (x) {
                 case 0:
-                    dev = device_get_binding("UART_0");
+                    /**
+                     * @brief this needs modification. 
+                     * 
+                     * @todo Do cleanup here.
+                     */
+                    dev = device_get_binding(DT_LABEL(LTE_UART));
+                    // dev = device_get_binding("UART_0");
                     break;
                 case 1:
                     dev = device_get_binding("UART_1");
@@ -360,10 +374,13 @@ int32_t uPortUartOpen(int32_t uart, int32_t baudRate,
                 // baud rate as everything else is good at the
                 // default values (8N1).
                 gUartData[uart].config.baudrate = baudRate;
+                gUartData[uart].config.parity = UART_CFG_PARITY_NONE;
+                gUartData[uart].config.stop_bits = UART_CFG_STOP_BITS_1;
+                gUartData[uart].config.data_bits = UART_CFG_DATA_BITS_8;
                 uart_configure(gUartData[uart].pDevice, &gUartData[uart].config);
                 uart_irq_callback_user_data_set(gUartData[uart].pDevice, uartCb, NULL);
                 uart_irq_rx_enable(gUartData[uart].pDevice);
-
+                uart_irq_tx_enable(gUartData[uart].pDevice);
                 handleOrErrorCode = uart;
             }
         }
