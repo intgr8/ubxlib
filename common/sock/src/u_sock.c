@@ -470,9 +470,14 @@ static int32_t init()
             // uXxxSockInit returns a negated value of errno
             // from the U_SOCK_Exxx list
             errnoLocal = uCellSockInit();
-            if (errnoLocal == U_SOCK_ENONE) {
-                errnoLocal = uWifiSockInit();
-            }
+            /**
+             * 
+             * @todo why is there this snippent. 
+             * 
+             */
+            // if (errnoLocal == U_SOCK_ENONE) {
+            //     errnoLocal = uWifiSockInit();
+            // }
 
             if (errnoLocal == U_SOCK_ENONE) {
                 //  Link the static containers into the start of the container list
@@ -1875,7 +1880,12 @@ int32_t uSockSecurity(uSockDescriptor_t descriptor,
                 }
             } else {
                 // We're good
-                if (U_NETWORK_HANDLE_IS_CELL(networkHandle)) {
+                // if (U_NETWORK_HANDLE_IS_CELL(networkHandle)) {
+                /**
+                 * @todo cleanup later.
+                 * 
+                 */
+                if (true) {
                     // In the cellular case the security
                     // profile has to be applied before connect
                     errnoLocal = -uCellSockSecure(networkHandle,

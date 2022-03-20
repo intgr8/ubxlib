@@ -100,7 +100,7 @@ static uNetwork_t *pGetNetwork(int32_t handle)
 
 // Add a network to the list, mallocing as necessary.
 // Note: this does not lock the mutex, you have to do that.
-static uNetwork_t *pAddInstance()
+uNetwork_t *pAddInstance()
 {
     uNetwork_t *pTmp = gpNetworkListHead;
     uNetwork_t *pNetwork;
@@ -175,24 +175,24 @@ int32_t uNetworkInit()
 
             // Call the init functions in the
             // underlying network layers
-            errorCode = uNetworkInitBle();
+            // errorCode = uNetworkInitBle();
             if ((errorCode == 0) || (errorCode == (int32_t) U_ERROR_COMMON_NOT_IMPLEMENTED)) {
-                errorCode = uNetworkInitCell();
+                // errorCode = uNetworkInitCell();
                 if ((errorCode == 0) || (errorCode == (int32_t) U_ERROR_COMMON_NOT_IMPLEMENTED)) {
-                    errorCode = uNetworkInitWifi();
+                    // errorCode = uNetworkInitWifi();
                     if ((errorCode == 0) || (errorCode == (int32_t) U_ERROR_COMMON_NOT_IMPLEMENTED)) {
-                        errorCode = uNetworkInitGnss();
+                        // errorCode = uNetworkInitGnss();
                         if (!((errorCode == 0) || (errorCode == (int32_t) U_ERROR_COMMON_NOT_IMPLEMENTED))) {
-                            uNetworkDeinitWifi();
+                            // uNetworkDeinitWifi();
                             uNetworkDeinitCell();
-                            uNetworkDeinitBle();
+                            // uNetworkDeinitBle();
                         }
                     } else {
                         uNetworkDeinitCell();
-                        uNetworkDeinitBle();
+                        // uNetworkDeinitBle();
                     }
                 } else {
-                    uNetworkDeinitBle();
+                    // uNetworkDeinitBle()
                 }
             }
 
@@ -273,9 +273,9 @@ int32_t uNetworkAdd(uNetworkType_t type,
                     case U_NETWORK_TYPE_BLE:
                         // First parameter in the config must indicate
                         // that it is for BLE
-                        if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_BLE) {
-                            errorCodeOrHandle = uNetworkAddBle((const uNetworkConfigurationBle_t *) pConfiguration);
-                        }
+                        // if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_BLE) {
+                        //     errorCodeOrHandle = uNetworkAddBle((const uNetworkConfigurationBle_t *) pConfiguration);
+                        // }
                         break;
                     case U_NETWORK_TYPE_CELL:
                         // First parameter in the config must indicate
@@ -287,16 +287,16 @@ int32_t uNetworkAdd(uNetworkType_t type,
                     case U_NETWORK_TYPE_WIFI:
                         // First parameter in the config must indicate
                         // that it is for Wifi
-                        if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_WIFI) {
-                            errorCodeOrHandle = uNetworkAddWifi((const uNetworkConfigurationWifi_t *) pConfiguration);
-                        }
+                        // if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_WIFI) {
+                        //     errorCodeOrHandle = uNetworkAddWifi((const uNetworkConfigurationWifi_t *) pConfiguration);
+                        // }
                         break;
                     case U_NETWORK_TYPE_GNSS:
                         // First parameter in the config must indicate
                         // that it is for GNSS
-                        if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_GNSS) {
-                            errorCodeOrHandle = uNetworkAddGnss((const uNetworkConfigurationGnss_t *) pConfiguration);
-                        }
+                        // if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_GNSS) {
+                        //     errorCodeOrHandle = uNetworkAddGnss((const uNetworkConfigurationGnss_t *) pConfiguration);
+                        // }
                         break;
                     default:
                         break;
@@ -361,17 +361,17 @@ int32_t uNetworkUp(int32_t handle)
             handle = pNetwork->handle;
             pConfiguration = pNetwork->pConfiguration;
             if (U_NETWORK_HANDLE_IS_BLE(handle)) {
-                errorCode = uNetworkUpBle(handle,
-                                          (const uNetworkConfigurationBle_t *) pConfiguration);
+                // errorCode = uNetworkUpBle(handle,
+                //                           (const uNetworkConfigurationBle_t *) pConfiguration);
             } else if (U_NETWORK_HANDLE_IS_CELL(handle)) {
                 errorCode = uNetworkUpCell(handle,
                                            (const uNetworkConfigurationCell_t *) pConfiguration);
             } else if (U_NETWORK_HANDLE_IS_WIFI(handle)) {
-                errorCode = uNetworkUpWifi(handle,
-                                           (const uNetworkConfigurationWifi_t *) pConfiguration);
+                // errorCode = uNetworkUpWifi(handle,
+                //                            (const uNetworkConfigurationWifi_t *) pConfiguration);
             } else if (U_NETWORK_HANDLE_IS_GNSS(handle)) {
-                errorCode = uNetworkUpGnss(handle,
-                                           (const uNetworkConfigurationGnss_t *) pConfiguration);
+                // errorCode = uNetworkUpGnss(handle,
+                //                            (const uNetworkConfigurationGnss_t *) pConfiguration);
             }
         }
 

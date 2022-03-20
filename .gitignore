@@ -23,3 +23,5 @@ config.yml
 arm-toolchain-path.txt
 _build
 /port/platform/arduino/ubxlib
+# custom
+.vscode-ctags
