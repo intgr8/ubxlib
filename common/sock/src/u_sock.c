@@ -513,7 +513,11 @@ static void deinitButNotMutex()
         // to remain.
 
         uCellSockDeinit();
-        uWifiSockDeinit();
+        /**
+         * @todo Figure out the bug with this.
+         * 
+         */
+        // uWifiSockDeinit();
 
         gInitialised = false;
     }
