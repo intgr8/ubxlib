@@ -146,11 +146,11 @@ static int32_t remove(int32_t handle)
     int32_t errorCode = (int32_t) U_ERROR_COMMON_INVALID_PARAMETER;
 
     if (U_NETWORK_HANDLE_IS_BLE(handle)) {
-        errorCode = uNetworkRemoveBle(handle);
+        // errorCode = uNetworkRemoveBle(handle);
     } else if (U_NETWORK_HANDLE_IS_CELL(handle)) {
         errorCode = uNetworkRemoveCell(handle);
     } else if (U_NETWORK_HANDLE_IS_WIFI(handle)) {
-        errorCode = uNetworkRemoveWifi(handle);
+        // errorCode = uNetworkRemoveWifi(handle);
     } else if (U_NETWORK_HANDLE_IS_GNSS(handle)) {
         errorCode = uNetworkRemoveGnss(handle);
     }
@@ -242,9 +242,9 @@ void uNetworkDeinit()
         // Call the deinit functions in the
         // underlying network layers
         uNetworkDeinitGnss();
-        uNetworkDeinitWifi();
+        // uNetworkDeinitWifi();
         uNetworkDeinitCell();
-        uNetworkDeinitBle();
+        // uNetworkDeinitBle();
 
         U_PORT_MUTEX_UNLOCK(gMutex);
         uPortMutexDelete(gMutex);
@@ -294,9 +294,9 @@ int32_t uNetworkAdd(uNetworkType_t type,
                     case U_NETWORK_TYPE_GNSS:
                         // First parameter in the config must indicate
                         // that it is for GNSS
-                        // if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_GNSS) {
-                        //     errorCodeOrHandle = uNetworkAddGnss((const uNetworkConfigurationGnss_t *) pConfiguration);
-                        // }
+                        if (*((const uNetworkType_t *) pConfiguration) == U_NETWORK_TYPE_GNSS) {
+                            errorCodeOrHandle = uNetworkAddGnss((const uNetworkConfigurationGnss_t *) pConfiguration);
+                        }
                         break;
                     default:
                         break;
@@ -370,8 +370,8 @@ int32_t uNetworkUp(int32_t handle)
                 // errorCode = uNetworkUpWifi(handle,
                 //                            (const uNetworkConfigurationWifi_t *) pConfiguration);
             } else if (U_NETWORK_HANDLE_IS_GNSS(handle)) {
-                // errorCode = uNetworkUpGnss(handle,
-                //                            (const uNetworkConfigurationGnss_t *) pConfiguration);
+                errorCode = uNetworkUpGnss(handle,
+                                           (const uNetworkConfigurationGnss_t *) pConfiguration);
             }
         }
 

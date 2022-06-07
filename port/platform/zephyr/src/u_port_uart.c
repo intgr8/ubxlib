@@ -70,6 +70,7 @@
  * 
  */
 #define LTE_UART    DT_ALIAS(lteuart)
+#define GNSS_UART    DT_ALIAS(gnssuart)
 /* ----------------------------------------------------------------
  * TYPES
  * -------------------------------------------------------------- */
@@ -274,7 +275,8 @@ int32_t uPortUartInit()
                      * 
                      * @todo Do cleanup here.
                      */
-                    dev = device_get_binding(DT_LABEL(LTE_UART));
+                    // dev = device_get_binding(DT_LABEL(LTE_UART));
+                    dev = device_get_binding(DT_LABEL(GNSS_UART));
                     // dev = device_get_binding("UART_0");
                     break;
                 case 1:
