@@ -262,6 +262,8 @@ static void uartCb(const struct device *uart, void *user_data)
 /**
  * @todo This needs re-consideration to make it cleaner:
  * - Currenly we are hardcoding the instances for each device.
+ *
+ */
 int32_t uPortUartInit()
 {
     uErrorCode_t errorCode = U_ERROR_COMMON_SUCCESS;
