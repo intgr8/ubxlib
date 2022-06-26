@@ -70,6 +70,7 @@
  * 
  */
 #define LTE_UART    DT_ALIAS(lteuart)
+#define GNSS_UART    DT_ALIAS(gnssuart)
 /* ----------------------------------------------------------------
  * TYPES
  * -------------------------------------------------------------- */
@@ -258,7 +259,11 @@ static void uartCb(const struct device *uart, void *user_data)
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS
  * -------------------------------------------------------------- */
-
+/**
+ * @todo This needs re-consideration to make it cleaner:
+ * - Currenly we are hardcoding the instances for each device.
+ *
+ */
 int32_t uPortUartInit()
 {
     uErrorCode_t errorCode = U_ERROR_COMMON_SUCCESS;
@@ -275,10 +280,12 @@ int32_t uPortUartInit()
                      * @todo Do cleanup here.
                      */
                     dev = device_get_binding(DT_LABEL(LTE_UART));
+                    // dev = device_get_binding(DT_LABEL(GNSS_UART));
                     // dev = device_get_binding("UART_0");
                     break;
                 case 1:
-                    dev = device_get_binding("UART_1");
+                    // dev = device_get_binding("UART_1");
+                    dev = device_get_binding(DT_LABEL(GNSS_UART));
                     break;
                 case 2:
                     dev = device_get_binding("UART_2");

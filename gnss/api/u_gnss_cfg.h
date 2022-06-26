@@ -76,6 +76,19 @@ int32_t uGnssCfgGetFixMode(int32_t gnssHandle);
  */
 int32_t uGnssCfgSetFixMode(int32_t gnssHandle, uGnssFixMode_t fixMode);
 
+/**
+ * Invert Active-low logic of ANT-OFF to active-high
+ *
+ * @warning This is a one way door. Once called, it should not be called anymore
+ * and it is irreversible.
+ *
+ * @note By default the code is disabled. Set @c ENABLE_CFG_SET_ANT_OFF in the
+ * ublox-intgr8 config file, @file  intgr8_ubxlib_config.h
+ * @param gnssHandle  the handle of the GNSS instance.
+ * @return zero on succes or negative error code.
+ */
+int32_t uGnssCfgSetANTOff(int32_t gnssHandle);
+
 #ifdef __cplusplus
 }
 #endif

@@ -34,7 +34,8 @@ extern "C" {
 #ifndef U_GNSS_POS_TIMEOUT_SECONDS
 /** The timeout for position establishment in seconds.
  */
-# define U_GNSS_POS_TIMEOUT_SECONDS 240
+// # define U_GNSS_POS_TIMEOUT_SECONDS 240
+# define U_GNSS_POS_TIMEOUT_SECONDS   30000
 #endif
 
 /* ----------------------------------------------------------------

@@ -55,6 +55,7 @@
 #include "u_gnss.h"
 #include "u_gnss_private.h"
 
+#include "intgr8_ubxlib_config.h"
 /* ----------------------------------------------------------------
  * COMPILE-TIME MACROS
  * -------------------------------------------------------------- */
@@ -447,6 +448,80 @@ static int32_t sendReceiveUbxMessage(const uGnssPrivateInstance_t *pInstance,
     return errorCodeOrResponseBodyLength;
 }
 
+
+// Send a ubx format message to the GNSS module and receive
+// the response.
+#if ENABLE_CFG_SET_ANT_OFF
+static int32_t sendRawReceiveUbxMessage(const uGnssPrivateInstance_t *pInstance,
+                                     int32_t messageClass,
+                                     int32_t messageId,
+                                     const char *pMessageBody,
+                                     size_t messageBodyLengthBytes,
+                                     uGnssPrivateUbxMessage_t *pResponse)
+{
+    int32_t errorCodeOrResponseBodyLength = (int32_t) U_ERROR_COMMON_INVALID_PARAMETER;
+    int32_t bytesToSend = 0;
+    char *pBuffer;
+
+    if ((pInstance != NULL) &&
+        (((pMessageBody == NULL) && (messageBodyLengthBytes == 0)) ||
+         (messageBodyLengthBytes > 0)) &&
+        ((pResponse->bodyMaxLengthBytes == 0) || (pResponse->pBody != NULL))) {
+        errorCodeOrResponseBodyLength = (int32_t) U_ERROR_COMMON_NO_MEMORY;
+        // Allocate a buffer big enough to encode the outgoing message
+        pBuffer = (char *) malloc(messageBodyLengthBytes + U_UBX_PROTOCOL_OVERHEAD_LENGTH_BYTES);
+        if (pBuffer != NULL) {
+            errorCodeOrResponseBodyLength = (int32_t) U_GNSS_ERROR_TRANSPORT;
+            bytesToSend = uUbxProtocolEncode(messageClass, messageId,
+                                             pMessageBody, messageBodyLengthBytes,
+                                             pBuffer);
+            if (bytesToSend > 0) {
+
+                U_PORT_MUTEX_LOCK(pInstance->transportMutex);
+
+                switch (pInstance->transportType) {
+                    case U_GNSS_TRANSPORT_UBX_UART:
+                    //lint -fallthrough
+                    case U_GNSS_TRANSPORT_NMEA_UART:
+                        printk("\n");
+                        for (uint32_t cx = 0u; cx < bytesToSend; cx++)
+                        {
+                          printk("%X ", pBuffer[cx]);
+                        }
+                        printk("\n Done Setting the CMD for ANT-OFF invert <--- \n");
+                        errorCodeOrResponseBodyLength = sendUbxMessageUart(pInstance->transportHandle.uart,
+                                                                           pBuffer, bytesToSend,
+                                                                           pInstance->printUbxMessages);
+                        if (errorCodeOrResponseBodyLength >= 0) {
+                            errorCodeOrResponseBodyLength = receiveUbxMessageUart(pInstance->transportHandle.uart,
+                                                                                  pResponse, pInstance->timeoutMs,
+                                                                                  pInstance->printUbxMessages);
+                        }
+                        break;
+                    case U_GNSS_TRANSPORT_UBX_AT:
+                        // lint -e{1773} Suppress attempt to cast away const: I'm not!
+                        errorCodeOrResponseBodyLength = sendReceiveUbxMessageAt((const uAtClientHandle_t)
+                                                                                pInstance->transportHandle.pAt,
+                                                                                pBuffer, bytesToSend,
+                                                                                pResponse, pInstance->timeoutMs,
+                                                                                pInstance->printUbxMessages);
+                        break;
+                    default:
+                        break;
+                }
+
+                U_PORT_MUTEX_UNLOCK(pInstance->transportMutex);
+            }
+
+            // Free memory
+            free(pBuffer);
+        }
+    }
+
+    return errorCodeOrResponseBodyLength;
+}
+#endif // ENABLE_CFG_SET_ANT_OFF
+
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS THAT ARE PRIVATE TO GNSS
  * -------------------------------------------------------------- */
@@ -631,6 +706,42 @@ int32_t uGnssPrivateSendUbxMessage(const uGnssPrivateInstance_t *pInstance,
 
     return errorCode;
 }
+
+#if ENABLE_CFG_SET_ANT_OFF
+int32_t uGnssPrivateSendRawMessage(const uGnssPrivateInstance_t *pInstance,
+                                   int32_t messageClass,
+                                   int32_t messageId,
+                                   const char *pMessageBody,
+                                   size_t messageBodyLengthBytes)
+{
+    int32_t errorCode;
+    uGnssPrivateUbxMessage_t response;
+    char ackBody[2];
+
+    // Fill the response structure in with the message class
+    // and ID we expect to get back and the buffer passed in.
+    response.cls = 0x05;
+    response.id = -1;
+    response.pBody = ackBody;
+    response.bodyMaxLengthBytes = sizeof(ackBody);
+
+    errorCode = sendRawReceiveUbxMessage(pInstance, messageClass, messageId,
+                                      pMessageBody, messageBodyLengthBytes,
+                                      &response);
+    if ((errorCode == 2) && (response.cls == 0x05) &&
+        (*(response.pBody) == (char) messageClass) &&
+        (*(response.pBody + 1) == (char) messageId)) {
+        errorCode = (int32_t) U_GNSS_ERROR_NACK;
+        if (response.id == 0x01) {
+            errorCode = (int32_t) U_ERROR_COMMON_SUCCESS;
+        }
+    } else {
+        errorCode = (int32_t) U_ERROR_COMMON_UNKNOWN;
+    }
+
+    return errorCode;
+}
+#endif // ENABLE_CFG_SET_ANT_OFF
 
 // Shut down and free memory from a running pos task.
 void uGnssPrivateCleanUpPosTask(uGnssPrivateInstance_t *pInstance)

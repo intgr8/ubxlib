@@ -268,6 +268,12 @@ int32_t uGnssPrivateSendUbxMessage(const uGnssPrivateInstance_t *pInstance,
                                    const char *pMessageBody,
                                    size_t messageBodyLengthBytes);
 
+int32_t uGnssPrivateSendRawMessage(const uGnssPrivateInstance_t *pInstance,
+                                   int32_t messageClass,
+                                   int32_t messageId,
+                                   const char *pMessageBody,
+                                   size_t messageBodyLengthBytes);
+
 /** Shut down and free memory from a [potentially] running pos task.
  * Note: gUGnssPrivateMutex should be locked before this is called.
  *
