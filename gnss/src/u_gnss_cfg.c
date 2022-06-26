@@ -45,6 +45,8 @@
 #include "u_gnss_private.h"
 #include "u_gnss_cfg.h"
 
+#include "intgr8_ubxlib_config.h"
+
 /* ----------------------------------------------------------------
  * COMPILE-TIME MACROS
  * -------------------------------------------------------------- */
@@ -127,6 +129,56 @@ static int32_t uGnssCfgSetUbxCfgNav5(int32_t gnssHandle,
 
     return errorCode;
 }
+
+#if ENABLE_CFG_SET_ANT_OFF
+int32_t uGnssCfgSetANTOff(int32_t gnssHandle)
+{
+  // Sequence B5 62 06 41 0C 00 00 00 03 1F 90 47 4F B1 FF FF EA FF 33 98
+  char message[36];
+  // message[0] = 0x0C;
+  // message[1] = 0x00;
+  message[0] = 0x00;
+  message[1] = 0x00;
+  message[2] = 0x03;
+  message[3] = 0x1F;
+  message[4] = 0x90;
+  message[5] = 0x47;
+  message[6] = 0x4F;
+  message[7] = 0xB1;
+  message[8] = 0xFF;
+  message[9] = 0xFF;
+  message[10] = 0xEA;
+  message[11] = 0xFF;
+  int32_t errorCode = (int32_t) U_ERROR_COMMON_NOT_INITIALISED;
+  uGnssPrivateInstance_t* pInstance;
+
+  if (gUGnssPrivateMutex != NULL) {
+
+      U_PORT_MUTEX_LOCK(gUGnssPrivateMutex);
+
+      pInstance = pUGnssPrivateGetInstance(gnssHandle);
+      if (pInstance != NULL) {
+          errorCode = (int32_t) U_ERROR_COMMON_PLATFORM;
+          // Poll with the message class and ID of the
+          // UBX-CFG-NAV5 message
+          // if (uGnssPrivateSendReceiveUbxMessage(pInstance,
+          //                                       0x06, 0x24,
+          //                                       NULL, 0,
+          //                                       message, 36) == 36) {
+          if (uGnssPrivateSendRawMessage(pInstance, 0x06, 0x41, message, 12u))
+          {
+              errorCode = (int32_t) U_ERROR_COMMON_SUCCESS;
+          }
+      }
+
+      U_PORT_MUTEX_UNLOCK(gUGnssPrivateMutex);
+  }
+
+  return errorCode;
+
+}
+#endif // ENABLE_CFG_SET_ANT_OFF
+
 
 /* ----------------------------------------------------------------
  * PUBLIC FUNCTIONS
