@@ -139,6 +139,7 @@ static const uCellNetStatus_t g3gppStatusToCellStatus[] = {
 /** The possible registration query strings.
  */
 static const uCellNetRegTypes_t gRegTypes[] = {
+   // {U_CELL_NET_REG_DOMAIN_PS, "AT+CEREG?", "+CEREG:", (1UL << (int32_t) U_CELL_NET_RAT_CATM1)}
     {U_CELL_NET_REG_DOMAIN_CS, "AT+CREG?", "+CREG:", INT_MAX /* All RATs */},
     {U_CELL_NET_REG_DOMAIN_PS, "AT+CGREG?", "+CGREG:", INT_MAX /* All RATs */},
     {
@@ -476,7 +477,7 @@ static bool keepGoingLocalCb(const uCellPrivateInstance_t *pInstance)
         if ((pInstance->startTimeMs > 0) &&
             (uPortGetTickTimeMs() > pInstance->startTimeMs +
              (U_CELL_NET_CONNECT_TIMEOUT_SECONDS * 1000))) {
-            keepGoing = false;
+            // keepGoing = false;
         }
     }
 
@@ -2280,6 +2281,7 @@ int32_t uCellNetScanGetFirst(int32_t cellHandle,
     char *pBuffer;
     int32_t bytesRead;
     int32_t mode;
+    int32_t x;
     int64_t innerStartTimeMs;
     uAtClientDeviceError_t deviceError;
     bool gotAnswer = false;
@@ -2306,6 +2308,34 @@ int32_t uCellNetScanGetFirst(int32_t cellHandle,
                 errorCodeOrNumber = (int32_t) U_CELL_ERROR_TEMPORARY_FAILURE;
                 // Ensure that we're powered up.
                 mode = uCellPrivateCFunOne(pInstance);
+               if (mode != 1)
+               {
+                  uPortLog("U_CELL_NET: wrong mode for network search.\n");
+               }
+               else
+               {
+                  uPortLog("U_CELL_NET: Good CFUN for network search.\n");
+               }
+               uAtClientLock(atHandle);
+               uAtClientCommandStart(atHandle, "AT+COPS?");
+               uAtClientCommandStop(atHandle);
+               uAtClientResponseStart(atHandle, "+COPS:");
+               x = uAtClientReadInt(atHandle);
+               uPortLog("U_CELL_NET: %d COPS response.\n", x);
+               uAtClientResponseStop(atHandle);
+               uAtClientUnlock(atHandle);
+               uAtClientLock(atHandle);
+               uAtClientTimeoutSet(atHandle, 1000);
+               uAtClientCommandStart(atHandle, "AT+COPS=0");
+               uAtClientCommandStop(atHandle);
+               uAtClientResponseStart(atHandle, NULL);
+               x = uAtClientErrorGet(atHandle);
+               uPortLog("U_CELL_NET: %d last error.\n", x);
+               uAtClientClearError(atHandle);
+               uPortTaskBlock(1000);
+               uAtClientResponseStop(atHandle);
+               uAtClientUnlock(atHandle);
+
                 // Start a scan
                 // Do this three times: if the module
                 // is busy doing its own search when we ask it

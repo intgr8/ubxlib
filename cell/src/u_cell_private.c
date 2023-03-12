@@ -313,30 +313,37 @@ int32_t  uCellPrivateCFunOne(uCellPrivateInstance_t *pInstance)
     int32_t errorCodeOrMode;
     uAtClientHandle_t atHandle = pInstance->atHandle;
 
-    uAtClientLock(atHandle);
-    uAtClientCommandStart(atHandle, "AT+CFUN?");
-    uAtClientCommandStop(atHandle);
-    uAtClientResponseStart(atHandle, "+CFUN:");
-    errorCodeOrMode = uAtClientReadInt(atHandle);
-    uAtClientResponseStop(atHandle);
-    uAtClientUnlock(atHandle);
-    // Set powered-up mode if it wasn't already
-    if (errorCodeOrMode != 1) {
-        // Wait for flip time to expire
-        while (uPortGetTickTimeMs() < pInstance->lastCfunFlipTimeMs +
-               (U_CELL_PRIVATE_AT_CFUN_FLIP_DELAY_SECONDS * 1000)) {
-            uPortTaskBlock(1000);
-        }
-        uAtClientLock(atHandle);
-        uAtClientCommandStart(atHandle, "AT+CFUN=1");
-        uAtClientCommandStopReadResponse(atHandle);
-        if (uAtClientUnlock(atHandle) == 0) {
-            pInstance->lastCfunFlipTimeMs = uPortGetTickTimeMs();
-            // And don't do anything for a second,
-            // as the module might not be quite ready yet
-            uPortTaskBlock(1000);
-        }
-    }
+    while (true)
+   {
+      uAtClientLock(atHandle);
+      uAtClientCommandStart(atHandle, "AT+CFUN?");
+      uAtClientCommandStop(atHandle);
+      uAtClientResponseStart(atHandle, "+CFUN:");
+      errorCodeOrMode = uAtClientReadInt(atHandle);
+      uAtClientResponseStop(atHandle);
+      uAtClientUnlock(atHandle);
+      // Set powered-up mode if it wasn't already
+      if (errorCodeOrMode != 1) {
+         // Wait for flip time to expire
+         while (uPortGetTickTimeMs() < pInstance->lastCfunFlipTimeMs +
+                  (U_CELL_PRIVATE_AT_CFUN_FLIP_DELAY_SECONDS * 1000)) {
+               uPortTaskBlock(1000);
+         }
+         uAtClientLock(atHandle);
+         uAtClientCommandStart(atHandle, "AT+CFUN=1");
+         uAtClientCommandStopReadResponse(atHandle);
+         if (uAtClientUnlock(atHandle) == 0) {
+               pInstance->lastCfunFlipTimeMs = uPortGetTickTimeMs();
+               // And don't do anything for a second,
+               // as the module might not be quite ready yet
+               uPortTaskBlock(1000);
+         }
+      }
+      else
+      {
+         break;
+      }
+   }
 
     return errorCodeOrMode;
 }
