@@ -477,7 +477,7 @@ static bool keepGoingLocalCb(const uCellPrivateInstance_t *pInstance)
         if ((pInstance->startTimeMs > 0) &&
             (uPortGetTickTimeMs() > pInstance->startTimeMs +
              (U_CELL_NET_CONNECT_TIMEOUT_SECONDS * 1000))) {
-            // keepGoing = false;
+            keepGoing = false;
         }
     }
 
@@ -529,6 +529,206 @@ static int32_t radioOff(uCellPrivateInstance_t *pInstance)
 
     return errorCode;
 }
+
+/**
+ * @todo Enable this for extra testing.
+*/
+#if 0
+static void testForDigi(uCellPrivateInstance_t *pInstance)
+{
+   int32_t errorCode = (int32_t) U_CELL_ERROR_AT;
+   int32_t x;
+   int32_t y;
+   int32_t xx;
+   int32_t yy;
+   int32_t length;
+   uAtClientHandle_t atHandle = pInstance->atHandle;
+   int32_t status3gpp;
+   char buffer[15]; // Enough room for "-180.0000000" plus a terminator
+   char buffer2[15];
+
+   uPortLog("U_CELL_NET:test This is extra to get some info.\n");
+   uPortLog("-----------------------------------------------\n");
+   uPortLog("This does not add any new feature\n");
+   uAtClientLock(atHandle);
+   // Clear out the old RF readings
+   uCellPrivateClearRadioParameters(&(pInstance->radioParameters));
+   uAtClientCommandStart(atHandle, "AT+COPS?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+COPS:");
+   status3gpp = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d AT+COPS? \n",errorCode, status3gpp);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CSQ");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CSQ:");
+   x = uAtClientReadInt(atHandle);
+   y = uAtClientReadInt(atHandle);
+   if (y == 99) {
+      y = -1;
+   }
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d x %d y AT+CSQ? \n",errorCode, x, y);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CREG?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CREG:");
+   status3gpp = uAtClientReadInt(atHandle);
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d n %d stat AT+CREG? \n",errorCode, status3gpp, x);
+
+   // 1,0,"F SFR",1,0,1
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CPOL?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CPOL:");
+   x = uAtClientReadInt(atHandle);
+   y = uAtClientReadInt(atHandle);
+   length = uAtClientReadString(atHandle, buffer, sizeof(buffer), false);
+   xx = uAtClientReadInt(atHandle);
+   yy = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %s %x %y %xx %yy AT+COPL? \n",errorCode, buffer, x, y, xx, yy);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CFUN?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CFUN:");
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d x CFUN \n",errorCode, x);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGDCONT?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CGDCONT:");
+   x = uAtClientReadInt(atHandle);
+   length = uAtClientReadString(atHandle, buffer, sizeof(buffer), false);
+   length = uAtClientReadString(atHandle, buffer2, sizeof(buffer2), false);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d x CGDCONT %s %s \n",errorCode, x, buffer, buffer2);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGACT?");
+   uAtClientCommandStop(atHandle);
+   for (uint8_t xy = 0; (xy < U_CELL_NET_MAX_NUM_CONTEXTS); xy++) {
+      uAtClientResponseStart(atHandle, "+CGACT:");
+      // Check if this is our context ID
+      y = uAtClientReadInt(atHandle);
+      x = (uAtClientReadInt(atHandle) == 1);
+
+      uPortLog("U_CELL_NET:test %d error code. %d CGACT %d active \n",errorCode, y, x);
+      // if (y == contextId) {
+      //    ours = true;
+      //    // If it is, 1 means activated
+      //    // (if it is negative we will exit)
+      //    active = (uAtClientReadInt(atHandle) == 1);
+      // }
+   }
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CFUN=0");
+   uAtClientCommandStop(atHandle);
+   uPortTaskBlock(30000);
+   uAtClientCommandStart(atHandle, "AT+CFUN?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CFUN:");
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d x CFUN \n",errorCode, x);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGACT=");
+   uAtClientWriteInt(atHandle, 1);
+   uAtClientWriteInt(atHandle, 0);
+   uAtClientCommandStopReadResponse(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortTaskBlock(60000);
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGACT?");
+   uAtClientCommandStop(atHandle);
+   for (uint8_t xy = 0; (xy < U_CELL_NET_MAX_NUM_CONTEXTS); xy++) {
+      uAtClientResponseStart(atHandle, "+CGACT:");
+      // Check if this is our context ID
+      y = uAtClientReadInt(atHandle);
+      x = (uAtClientReadInt(atHandle) == 1);
+
+      uPortLog("U_CELL_NET:test %d error code. %d CGACT %d active \n",errorCode, y, x);
+      // if (y == contextId) {
+      //    ours = true;
+      //    // If it is, 1 means activated
+      //    // (if it is negative we will exit)
+      //    active = (uAtClientReadInt(atHandle) == 1);
+      // }
+   }
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGACT=");
+   uAtClientWriteInt(atHandle, 1);
+   uAtClientWriteInt(atHandle, 1);
+   uAtClientCommandStopReadResponse(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortTaskBlock(30000);
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CGACT?");
+   uAtClientCommandStop(atHandle);
+   for (uint8_t xy = 0; (xy < U_CELL_NET_MAX_NUM_CONTEXTS); xy++) {
+      uAtClientResponseStart(atHandle, "+CGACT:");
+      // Check if this is our context ID
+      y = uAtClientReadInt(atHandle);
+      x = (uAtClientReadInt(atHandle) == 1);
+
+      uPortLog("U_CELL_NET:test %d error code. %d CGACT %d active \n",errorCode, y, x);
+      // if (y == contextId) {
+      //    ours = true;
+      //    // If it is, 1 means activated
+      //    // (if it is negative we will exit)
+      //    active = (uAtClientReadInt(atHandle) == 1);
+      // }
+   }
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CFUN=1");
+   uAtClientCommandStop(atHandle);
+   uPortTaskBlock(180000);
+   uAtClientCommandStart(atHandle, "AT+CFUN?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CFUN:");
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d x CFUN \n",errorCode, x);
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+CREG?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+CREG:");
+   status3gpp = uAtClientReadInt(atHandle);
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+   uPortLog("U_CELL_NET:test %d error code. %d n %d stat AT+CREG? \n",errorCode, status3gpp, x);
+
+}
+
+#endif // extra testing.
 
 // Perform an abort of an AT command.
 static void abortCommand(const uCellPrivateInstance_t *pInstance)
@@ -832,6 +1032,12 @@ static int32_t registerNetwork(uCellPrivateInstance_t *pInstance,
     uAtClientLock(atHandle);
     uAtClientCommandStart(atHandle, "AT+CFUN=1");
     uAtClientCommandStopReadResponse(atHandle);
+    /**
+     * @todo Add delay.
+     * 
+     * @note Add some delay to wait for cfun mode change.
+    */
+   uPortTaskBlock(60000);
     errorCode = uAtClientUnlock(atHandle);
     if ((errorCode == 0) && (pMccMnc != NULL)) {
         pInstance->lastCfunFlipTimeMs = uPortGetTickTimeMs();
@@ -2027,6 +2233,15 @@ int32_t uCellNetRegister(int32_t cellHandle,
                                          pInstance->startTimeMs) / 1000));
                 } else {
                     // Switch radio off after failure
+
+                    /**
+                     * @todo testing code.
+                     * 
+                     * @note This will be called if things fail.
+                     */
+#if 0
+                  testForDigi(pInstance);
+#endif // extra testing.
                     radioOff(pInstance);
                     uPortLog("U_CELL_NET: registration attempt stopped after"
                              " %d second(s).\n",

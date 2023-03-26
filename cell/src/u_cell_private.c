@@ -332,6 +332,12 @@ int32_t  uCellPrivateCFunOne(uCellPrivateInstance_t *pInstance)
          uAtClientLock(atHandle);
          uAtClientCommandStart(atHandle, "AT+CFUN=1");
          uAtClientCommandStopReadResponse(atHandle);
+         /**
+          * @todo Add delay.
+          *
+          * @note Add some delay to wait for cfun mode change.
+          */
+         uPortTaskBlock(60000);
          if (uAtClientUnlock(atHandle) == 0) {
                pInstance->lastCfunFlipTimeMs = uPortGetTickTimeMs();
                // And don't do anything for a second,

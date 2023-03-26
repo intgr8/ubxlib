@@ -75,7 +75,7 @@
  * happen: if it returns at least this quickly with an error
  * then it is worth trying again.
  */
-# define U_CELL_SOCK_DNS_SHOULD_RETRY_MS 2000
+# define U_CELL_SOCK_DNS_SHOULD_RETRY_MS 10000
 #endif
 
 #ifndef U_CELL_SOCK_SECURE_DELAY_MILLISECONDS
