@@ -234,7 +234,9 @@ static void waitForPowerOff(uCellPrivateInstance_t *pInstance,
                             bool (*pKeepGoingCallback) (int32_t))
 {
     uAtClientHandle_t atHandle = pInstance->atHandle;
+    (void)(atHandle); // remove this when bug fixed.
     bool moduleIsOff = false;
+    static uint8_t waitCycle = 0;
     int64_t endTimeMs = uPortGetTickTimeMs() +
                         (((int64_t) pInstance->pModule->powerDownWaitSeconds) * 1000);
 
@@ -247,16 +249,24 @@ static void waitForPowerOff(uCellPrivateInstance_t *pInstance,
         } else {
             // Wait for the module to stop responding at the AT interface
             // by poking it with "AT"
+#if 0
             uAtClientLock(atHandle);
             uAtClientTimeoutSet(atHandle,
                                 pInstance->pModule->responseMaxWaitMs);
             uAtClientCommandStart(atHandle, "AT");
             uAtClientCommandStopReadResponse(atHandle);
             moduleIsOff = (uAtClientUnlock(atHandle) != 0);
+#endif // This is buggy.
+            // force it to wait.
+            if (waitCycle >= 10) {
+               moduleIsOff = true;
+            }
         }
+        waitCycle++;
         // Relax a bit
         uPortTaskBlock(1000);
     }
+    waitCycle = 0u;
 
     // We have rebooted
     if (moduleIsOff) {
