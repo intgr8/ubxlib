@@ -54,7 +54,7 @@
  * There are up to 4 UART HW blocks available, how many are
  * connected depends on the chip revision.
  */
-#define U_PORT_UART_MAX_NUM 2
+#define U_PORT_UART_MAX_NUM 3
 #endif
 
 #ifndef U_PORT_UART_BUFFER_SIZE
@@ -70,7 +70,8 @@
  * 
  */
 #define LTE_UART    DT_ALIAS(lteuart)
-#define GNSS_UART    DT_ALIAS(gnssuart)
+#define GNSS_UART   DT_ALIAS(gnssuart)
+#define WIFI_UART    DT_ALIAS(wifiuart)
 /* ----------------------------------------------------------------
  * TYPES
  * -------------------------------------------------------------- */
@@ -288,7 +289,7 @@ int32_t uPortUartInit()
                     dev = device_get_binding(DT_LABEL(GNSS_UART));
                     break;
                 case 2:
-                    dev = device_get_binding("UART_2");
+                    dev = device_get_binding(DT_LABEL(WIFI_UART));
                     break;
                 case 3:
                     dev = device_get_binding("UART_3");
