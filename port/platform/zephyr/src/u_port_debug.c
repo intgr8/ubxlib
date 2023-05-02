@@ -59,7 +59,7 @@ void uPortLogF(const char *pFormat, ...)
     va_list args;
 
     va_start(args, pFormat);
-
+    // @todo Check this with printf
     vprintf(pFormat, args);
 
     va_end(args);

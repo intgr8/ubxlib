@@ -18,6 +18,7 @@
 #define _U_SHORT_RANGE_EDM_STREAM_H_
 
 /* No #includes allowed here */
+#include "u_short_range.h"
 
 /** @file
  * @brief EDM (extended data mode) stream API for short range modules.

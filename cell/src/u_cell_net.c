@@ -1037,7 +1037,7 @@ static int32_t registerNetwork(uCellPrivateInstance_t *pInstance,
      * 
      * @note Add some delay to wait for cfun mode change.
     */
-   uPortTaskBlock(60000);
+   uPortTaskBlock(10000);
     errorCode = uAtClientUnlock(atHandle);
     if ((errorCode == 0) && (pMccMnc != NULL)) {
         pInstance->lastCfunFlipTimeMs = uPortGetTickTimeMs();

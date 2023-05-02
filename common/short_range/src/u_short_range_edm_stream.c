@@ -887,6 +887,7 @@ int32_t uShortRangeEdmStreamInit()
     }
 
     uShortRangeEdmResetParser();
+    uPortLog("U_SHORT_RANGE_EDM_STREAM: initialised mutex %d", errorCodeOrHandle);
 
     return (int32_t) errorCodeOrHandle;
 }

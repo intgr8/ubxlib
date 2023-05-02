@@ -529,6 +529,37 @@ static int32_t setEchoOff(const uAtClientHandle_t atHandle, uint8_t retries)
     return errorCode;
 }
 
+#if 0
+static int32_t setEchoOn(const uAtClientHandle_t atHandle, uint8_t retries)
+{
+    int32_t errorCode = (int32_t) U_ERROR_COMMON_UNKNOWN;
+    int32_t modeOrError;
+    for (uint8_t i = 0; i < retries; i++) {
+        uAtClientDeviceError_t deviceError;
+        uAtClientLock(atHandle);
+        uAtClientTimeoutSet(atHandle, 2000);
+        uAtClientCommandStart(atHandle, "ATE1");
+        uAtClientCommandStopReadResponse(atHandle);
+        uAtClientDeviceErrorGet(atHandle, &deviceError);
+        errorCode = uAtClientUnlock(atHandle);
+
+        if (errorCode == (int32_t) U_ERROR_COMMON_SUCCESS) {
+            break;
+        }
+    }
+
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "ATE?");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "ATE:");
+   modeOrError = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   errorCode = uAtClientUnlock(atHandle);
+
+    return errorCode;
+}
+#endif /* For testing only */
+
 static int32_t convert(const char *pStr)
 {
     for (int32_t i = 0;  i < (int32_t)gModuleInfoCount;  ++i) {
@@ -836,7 +867,7 @@ uShortRangeModuleType_t uShortRangeDetectModule(int32_t shortRangeHandle)
             // from garbage or stray characters so test twice;
             // Use ATE0 as we want the echo off anyway and it is a OK/ERROR only
             // response command.
-            errorCode = setEchoOff(pInstance->atHandle, 2);
+            errorCode = setEchoOff(pInstance->atHandle, 5);
 
             if (errorCode != (int32_t) U_ERROR_COMMON_SUCCESS &&
                 pInstance->mode == U_SHORT_RANGE_MODE_EDM) {
@@ -902,7 +933,9 @@ uShortRangeModuleType_t uShortRangeDetectModule(int32_t shortRangeHandle)
                     errorCode = setEchoOff(pInstance->atHandle, 2);
                 }
             }
-
+#if 0
+            errorCode = setEchoOn(pInstance->atHandle, 2);
+#endif /* For testing only. */
             if (errorCode == (int32_t) U_ERROR_COMMON_SUCCESS) {
                 module = getModule(pInstance->atHandle);
             }

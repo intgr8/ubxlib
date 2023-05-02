@@ -18,6 +18,7 @@
 #define _U_SHORT_RANGE_H_
 
 /* No #includes allowed here */
+#include "u_short_range_module_type.h"
 
 /** @file
  * @brief This header file defines the ShortRange APIs. These APIs are not

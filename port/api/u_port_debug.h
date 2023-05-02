@@ -34,7 +34,11 @@ extern "C" {
 /** Define U_CFG_ENABLE_LOGGING to enable debug prints.  How they
  * leave the building is dictated by the platform.
  */
-#if U_CFG_ENABLE_LOGGING
+/**
+ * @note Always set this to true.
+ */
+// #if U_CFG_ENABLE_LOGGING
+#if 1
 # define uPortLog(format, ...) \
              /*lint -e{507} suppress size incompatibility warnings in printf() */ \
              uPortLogF(format, ##__VA_ARGS__)

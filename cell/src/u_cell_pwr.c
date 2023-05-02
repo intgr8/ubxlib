@@ -246,11 +246,16 @@ static void waitForPowerOff(uCellPrivateInstance_t *pInstance,
             // If we have a VInt pin then wait until that
             // goes to the off state
             moduleIsOff = (uPortGpioGet(pInstance->pinVInt) == (int32_t) !U_CELL_VINT_PIN_ON_STATE);
+            // bug on line above.
         } else {
             // Wait for the module to stop responding at the AT interface
             // by poking it with "AT"
-#if 0
             uAtClientLock(atHandle);
+
+            /**
+             * @todo what happens here is that the UART interupt never happens.
+             */
+#if 0
             uAtClientTimeoutSet(atHandle,
                                 pInstance->pModule->responseMaxWaitMs);
             uAtClientCommandStart(atHandle, "AT");

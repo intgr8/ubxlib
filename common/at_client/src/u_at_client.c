@@ -2018,6 +2018,7 @@ uAtClientHandle_t uAtClientAdd(int32_t streamHandle,
                             // the event handlers which might call us
                             pClient->streamHandle = streamHandle;
                             pClient->streamType = streamType;
+                            // @todo Check these
                             pClient->debugOn = false;
                             pClient->printAtOn = false;
                             pClient->atTimeoutMs = U_AT_CLIENT_DEFAULT_TIMEOUT_MS;

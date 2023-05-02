@@ -135,5 +135,5 @@ uWifiModuleType_t uWifiDetectModule(int32_t wifiHandle)
 
     return wifiModule;
 }
-
+extern uWifiModuleType_t shortRangeToWifiModule(uShortRangeModuleType_t module);
 // End of file

@@ -536,6 +536,7 @@ int32_t uPortUartWrite(int32_t handle, const void *pBuffer,
             k_fifo_put(&gUartData[handle].fifoTxData, &data);
             uart_irq_tx_enable(gUartData[handle].pDevice);
             // UART write is async to wait here to make this function syncronous
+            // @todo change from forever
             k_sem_take(&gUartData[handle].txSem, K_FOREVER);
             U_PORT_MUTEX_UNLOCK(gMutex);
 
