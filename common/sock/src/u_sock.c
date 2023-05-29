@@ -2580,6 +2580,37 @@ int32_t uSockGetLocalAddress(uSockDescriptor_t descriptor,
     return errorCode;
 }
 
+
+
+int32_t uSockIsclosed(uSockDescriptor_t descriptor)
+{
+    int32_t errorCode = (int32_t) U_ERROR_COMMON_SUCCESS;
+    int32_t errnoLocal;
+    uSockContainer_t *pContainer = NULL;
+
+    errnoLocal = init();
+    if (errnoLocal == U_SOCK_ENONE) {
+        errnoLocal = U_SOCK_EINVAL;
+      U_PORT_MUTEX_LOCK(gMutexContainer);
+
+      // Check that the descriptor is at least valid
+      errnoLocal = U_SOCK_EBADF;
+      pContainer = pContainerFindByDescriptor(descriptor);
+      if (pContainer != NULL) {
+         errnoLocal= U_SOCK_ENONE;
+      } 
+      U_PORT_MUTEX_UNLOCK(gMutexContainer);
+   }
+
+    if (errnoLocal != U_SOCK_ENONE) {
+        // Write the errno
+        errno = errnoLocal;
+        errorCode = (int32_t) U_ERROR_COMMON_BSD_ERROR;
+    }
+
+    return errorCode;
+}
+
 // Get the IP address of the given host name.
 int32_t uSockGetHostByName(int32_t networkHandle,
                            const char *pHostName,

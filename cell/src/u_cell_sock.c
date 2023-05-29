@@ -75,7 +75,7 @@
  * happen: if it returns at least this quickly with an error
  * then it is worth trying again.
  */
-# define U_CELL_SOCK_DNS_SHOULD_RETRY_MS 10000
+# define U_CELL_SOCK_DNS_SHOULD_RETRY_MS 2000
 #endif
 
 #ifndef U_CELL_SOCK_SECURE_DELAY_MILLISECONDS
@@ -184,6 +184,19 @@ static void doUsoer(uAtClientHandle_t atHandle)
     uAtClientResponseStart(atHandle, "+USOER:");
     uAtClientResponseStop(atHandle);
     uAtClientUnlock(atHandle);
+}
+
+static bool doUsoerReturn(uAtClientHandle_t atHandle)
+{
+   int32_t x;
+   uAtClientLock(atHandle);
+   uAtClientCommandStart(atHandle, "AT+USOER");
+   uAtClientCommandStop(atHandle);
+   uAtClientResponseStart(atHandle, "+USOER:");
+   x = uAtClientReadInt(atHandle);
+   uAtClientResponseStop(atHandle);
+   uAtClientUnlock(atHandle);
+   return x;
 }
 
 // Create a socket entry in the list.
@@ -1874,6 +1887,7 @@ int32_t uCellSockGetHostByName(int32_t cellHandle,
 {
     int32_t errnoLocal = U_SOCK_EINVAL;
     int32_t atError = -1;
+    int32_t x;
     uCellPrivateInstance_t *pInstance;
     uAtClientHandle_t atHandle;
     int32_t bytesRead = 0;
@@ -1916,8 +1930,15 @@ int32_t uCellSockGetHostByName(int32_t cellHandle,
                 // Got an AT interace error, see
                 // what the module's socket error
                 // number has to say for debug purposes
-                doUsoer(atHandle);
-                uPortTaskBlock(U_CELL_SOCK_DNS_SHOULD_RETRY_MS / 2);
+                x = doUsoerReturn(atHandle);
+                if (x == 0)
+                {
+                  atError = 0;
+                }
+                else
+                {
+                  uPortTaskBlock(U_CELL_SOCK_DNS_SHOULD_RETRY_MS / 2);
+                }
             }
         }
 

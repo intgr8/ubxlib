@@ -400,6 +400,13 @@ int32_t uSockConnect(uSockDescriptor_t descriptor,
  */
 int32_t uSockClose(uSockDescriptor_t descriptor);
 
+/**
+ * @todo add description. 
+ * 
+ * Check before closing the socket.
+ */
+int32_t uSockIsclosed(uSockDescriptor_t descriptor);
+
 /** In order to maintain thread-safe operation, when a socket is
  * closed, either locally or by the remote host, it is only marked
  * as closed and the memory is retained, since some other thread
